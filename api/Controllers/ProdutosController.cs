@@ -23,24 +23,24 @@ public class ProdutosController : ControllerBase
     public IActionResult Get()
     {
         _logger.LogTrace("Get");
-        var response = new Models.ProdutoResponse();
+        var response = new Models.Response();
         try
         {
-            var lst = new List<Models.Produto>();
+            var lst = new List<Models.ProdutoResponse>();
             _logger.LogTrace("GetProdutos");
             var lstCore = _core.GetProdutos();
             _logger.LogDebug("_core.GetProdutos", lstCore.ToArray());
             foreach(SistemaVendasApi.Models.Produtos p in lstCore)
             {
-                var m = new Models.Produto();
-                m.Fill(p);
+                var m = Models.Produto.ConvertResponse(p);                
+                _logger.LogDebug("ConvertResponse", [m]);
                 lst.Add(m);
-                _logger.LogDebug("m.Fill", [m]);
             }
+            response.Data = lst;
             _logger.LogDebug("response", [response]);
             _logger.LogTrace("Return OK");
-            response.Data = lst;
-            return Ok(lst);
+            
+            return Ok(response);
         }
         catch(Exception ex)
         {
@@ -61,7 +61,7 @@ public class ProdutosController : ControllerBase
     public IActionResult Get(int id)
     {
         _logger.LogTrace("Get ID");
-        var response = new Models.ProdutoResponse();
+        var response = new Models.Response();
         try
         {
             _logger.LogTrace("GetProduto ID");
@@ -69,10 +69,10 @@ public class ProdutosController : ControllerBase
             if (produto == null) return NotFound();
             else
             {
-                var m = new Models.Produto();
-                m.Fill(produto);
+                var m = new Models.ProdutoResponse();
+                m = Models.Produto.ConvertResponse(produto);
+                _logger.LogDebug("ConvertResponse", [m]);
                 response.Data = m;
-                _logger.LogDebug("m.Fill", [m]);
                 _logger.LogTrace("Return OK");
                 return Ok(response);
             }
@@ -91,61 +91,19 @@ public class ProdutosController : ControllerBase
             return BadRequest(response);
         }
     }
-    
-    // [HttpGet("codigo")]
-    // public IActionResult Get(string codigo)
-    // {
-    //     _logger.LogTrace("Get codigo");
-    //     var response = new Models.ProdutoResponse();
-    //     try
-    //     {
-    //         _logger.LogTrace("GetProduto codigo");
-    //         var produto = _core.GetProduto(codigo);
-    //         _logger.LogDebug("produto",[produto]);
-    //         if (produto == null)
-    //         {
-    //             _logger.LogTrace("Return NotFound");
-    //             return NotFound();
-    //         }
-    //         else
-    //         {
-    //             var m = new Models.Produto();
-    //             m.Fill(produto);
-    //             response.Data = m;
-    //             _logger.LogDebug("m.Fill", [m]);
-    //             _logger.LogTrace("Return OK");
-    //             return Ok(response);
-    //         }
-    //     }
-    //     catch(Exception ex)
-    //     {
-    //         response.Validation = new Core.Validate.Validation();
-    //         response.Validation.Add(new Core.Validate.ModelValid()
-    //         {
-    //             Type = Core.Validate.ValidType.Error,
-    //             Message = ex.Message
-    //         });
-    //         _logger.LogDebug("response",[response]);
-    //         _logger.LogDebug("ex", [ex]);
-    //         _logger.LogError("Exception",[ex]);
-    //         return BadRequest(response);
-    //     }
-    // }
-
+   
     [HttpPost()]
     public IActionResult Post(Models.ProdutoRequest request)
     {
         _logger.LogTrace("Post");
-        var response = new Models.ProdutoResponse();
+        var response = new Models.Response();
 
         try
         {
-            _logger.LogTrace("Produto.Fill");
-            var produto = new Models.Produto();
-            produto.Fill(request);
-            _logger.LogDebug("Produto.Fill",[produto]);
-            var produtoCore = produto.ToModel();
-             _logger.LogTrace("_core.Add");
+            _logger.LogTrace("ConvertModel");
+            var produtoCore = Models.Produto.ConvertModel(request);
+            _logger.LogDebug("produtoCore",[produtoCore]);
+            _logger.LogTrace("_core.Add");
             produtoCore = _core.Add(produtoCore);
             _logger.LogDebug("produtoCore",[produtoCore]);
             if (produtoCore.ID.Equals(0))
@@ -154,8 +112,7 @@ public class ProdutosController : ControllerBase
             }
             else
             {
-                produto.Fill(produtoCore);
-                response.Data = produto;
+                response.Data = Models.Produto.ConvertResponse(produtoCore);
                 _logger.LogDebug("response", [response]);
                 _logger.LogTrace("Return OK");
                 return Ok(response);
@@ -180,24 +137,35 @@ public class ProdutosController : ControllerBase
     public IActionResult Put(int id, Models.ProdutoRequest request)
     {
         _logger.LogTrace("Put");
-        var response = new Models.ProdutoResponse();
+        var response = new Models.Response();
 
         try
         {
-            _logger.LogTrace("produto.Fill");
-            var produto = new Models.Produto();
-            produto.Fill(request);
-            _logger.LogDebug("produto",[produto]);
-            _logger.LogTrace("produto.ToModel");
-            var produtoCore = produto.ToModel();
-            _logger.LogTrace("_core.Update");
-            produtoCore = _core.Update(produtoCore);
-            _logger.LogDebug("produtoCore",[produtoCore]);
-            produto.Fill(produtoCore);
-            response.Data = produto;
-            _logger.LogDebug("response", [response]);
-            _logger.LogTrace("Return OK");
-            return Ok(response);
+            var produtoCore = _core.GetProduto(id);
+            if (produtoCore != null)
+            {
+                _logger.LogTrace("ConvertModel");
+                var produtoAlt = Models.Produto.ConvertModel(request);
+                produtoAlt.ID = produtoCore.ID;
+                _logger.LogDebug("produtoAlt",[produtoAlt]);
+                _logger.LogTrace("_core.Add");
+                _core.Update(produtoAlt);
+                _logger.LogDebug("response", [response]);
+                _logger.LogTrace("Return OK");
+                return Ok(response);
+            }
+            else
+            {
+                response.Validation = new Core.Validate.Validation();
+                response.Validation.Add(new Core.Validate.ModelValid()
+                {
+                    Type = Core.Validate.ValidType.Error,
+                    Message = "Produto não encontrado"
+                });
+                _logger.LogDebug("response",[response]);
+                return NotFound(response);
+            }
+            
         }
         catch(Exception ex)
         {
@@ -218,7 +186,7 @@ public class ProdutosController : ControllerBase
     public IActionResult Delete(int id)
     {
         _logger.LogTrace("Delete");
-        var response = new Models.ProdutoResponse();
+        var response = new Models.Response();
 
         try
         {
@@ -227,8 +195,14 @@ public class ProdutosController : ControllerBase
             _logger.LogDebug("produtoCore",[produtoCore]);
             if (produtoCore == null)
             {
-                _logger.LogTrace("Return NotFound");
-                return NotFound();
+                response.Validation = new Core.Validate.Validation();
+                response.Validation.Add(new Core.Validate.ModelValid()
+                {
+                    Type = Core.Validate.ValidType.Error,
+                    Message = "Produto não encontrado"
+                });
+                _logger.LogDebug("response",[response]);
+                return NotFound(response);
             }
             else
             {

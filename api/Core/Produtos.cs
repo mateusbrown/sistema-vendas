@@ -111,6 +111,18 @@ public class Produtos(SVContext Context)
             }
         }
 
+        if (action.Equals(ActionType.Delete))
+        {
+             if (model.ID.Equals(0))
+            {
+                validation.Add(new ModelValid()
+                {
+                    Type = ValidType.Warning,
+                    Message = "ID não informado"
+                });
+            }
+        }
+
         return validation;
     }
 
@@ -171,8 +183,10 @@ public class Produtos(SVContext Context)
             throw new Exception(valid.GetWarningMessages());
         }
 
-        produto = FillModel(repo.Update(FillDataModel(produto)));
-
+        if (!repo.Update(FillDataModel(produto)))
+        {
+            throw new Exception("Erro ao atualizar o produto");
+        }
         return produto;
     }
 
