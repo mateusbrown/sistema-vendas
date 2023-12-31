@@ -1,4 +1,3 @@
-using SistemaVendasApi.Core.Validate;
 using SistemaVendasApi.Data.Models;
 
 namespace SistemaVendasApi.Controllers.Models;

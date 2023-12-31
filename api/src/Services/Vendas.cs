@@ -1,7 +1,7 @@
 using SistemaVendasApi.Data;
-using SistemaVendasApi.Core.Validate;
+using SistemaVendasApi.Validation;
 
-namespace SistemaVendasApi.Core;
+namespace SistemaVendasApi.Services;
 
 public class Vendas(SVContext Context)
 {
@@ -69,9 +69,9 @@ public class Vendas(SVContext Context)
         };
     }
 
-    private Validation ValidateData(Models.Vendas model, ActionType action)
+    private ValidateProcess ValidateData(Models.Vendas model, ActionType action)
     {
-        Validation validation = new Validation();
+        ValidateProcess validation = new ValidateProcess();
         if (action.Equals(ActionType.Insert))
         {
             if (!model.ID.Equals(0))
@@ -111,9 +111,9 @@ public class Vendas(SVContext Context)
         return validation;
     }
 
-    private Validation ValidateData(Models.VendasDetalhe model, ActionType action)
+    private ValidateProcess ValidateData(Models.VendasDetalhe model, ActionType action)
     {
-        Validation validation = new Validation();
+        ValidateProcess validation = new ValidateProcess();
 
         if (model.Quantidade.Equals(0))
         {

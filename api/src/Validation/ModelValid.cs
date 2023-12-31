@@ -1,4 +1,4 @@
-namespace SistemaVendasApi.Core.Validate;
+namespace SistemaVendasApi.Validation;
 
 public enum ValidType
 {
@@ -20,7 +20,7 @@ public class ModelValid
     public string Message {get;set;} = "";
 }
 
-public class Validation
+public class ValidateProcess
 {
     private List<ModelValid> lst = new List<ModelValid>();
     private bool hasError = false;

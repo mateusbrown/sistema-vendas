@@ -1,8 +1,8 @@
-using SistemaVendasApi.Core.Validate;
+using SistemaVendasApi.Validation;
 
 namespace SistemaVendasApi.Controllers.Models;
 public class Response
 {
     public object ?Data {get;set;}
-    public Validation ?Validation {get;set;}
+    public ValidateProcess ?Validation {get;set;}
 }

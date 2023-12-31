@@ -1,7 +1,7 @@
 using SistemaVendasApi.Data;
-using SistemaVendasApi.Core.Validate;
+using SistemaVendasApi.Validation;
 
-namespace SistemaVendasApi.Core;
+namespace SistemaVendasApi.Services;
 
 public class Produtos(SVContext Context)
 {
@@ -29,9 +29,9 @@ public class Produtos(SVContext Context)
         };
     }
 
-    private Validation ValidateData(Models.Produtos model, ActionType action)
+    private ValidateProcess ValidateData(Models.Produtos model, ActionType action)
     {
-        Validation validation = new Validation();
+        ValidateProcess validation = new ValidateProcess();
 
         if (model.Codigo.Equals(""))
         {

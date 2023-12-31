@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaVendasApi.Data;
-using SistemaVendasApi.Core;
+using SistemaVendasApi.Services;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SistemaVendasApi.Controllers.Models;
 
@@ -53,23 +53,13 @@ public class VendasController : ControllerBase
                 _logger.LogDebug("lst.Add", [m]);
                 lst.Add(m);
             }
-            response.Data = lst;
-            _logger.LogDebug("response", [response]);
-            _logger.LogTrace("Return OK");
+            Models.ExceptionResponse.Ok(ref response, lst, _logger);
             return Ok(response);
 
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response, ex, _logger);
             return BadRequest(response);
         }
     }
@@ -104,35 +94,19 @@ public class VendasController : ControllerBase
                     m.Detalhes?.Add(vd);
                 }                
                 
-                response.Data = m;
-                _logger.LogDebug("response", [response]);
-                _logger.LogTrace("Return OK");
+                Models.ExceptionResponse.Ok(ref response, m, _logger);
                 return Ok(response);
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                Models.ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
 
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -157,48 +131,24 @@ public class VendasController : ControllerBase
                 {
                     _logger.LogTrace("Venda.ConvertResponse");
                     var m = Models.VendaDetalhe.ConvertResponse(detalhe);
-                    _logger.LogDebug("Venda.ConvertResponse", [m]);
-
-                    response.Data = m;
-                    _logger.LogDebug("response", [response]);
-                    _logger.LogTrace("Return OK");
+                    Models.ExceptionResponse.Ok(ref response, m, _logger);
                     return Ok(response);
                 }
                 else
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Error,
-                        Message = "Detalhe da venda não encontrado"
-                    });
-                    _logger.LogDebug("response",[response]);
+                    ExceptionResponse.Warning(ref response, "Detalhe da venda não encontrado", _logger);
                     return NotFound(response);
                 }
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -223,23 +173,13 @@ public class VendasController : ControllerBase
             }
             else
             {
-                response.Data = Models.Venda.ConvertResponse(vendaCore);
-                _logger.LogDebug("response", [response]);
-                _logger.LogTrace("Return OK");
+                ExceptionResponse.Ok(ref response, Models.Venda.ConvertResponse(vendaCore), _logger);
                 return Ok(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -267,36 +207,20 @@ public class VendasController : ControllerBase
                 }
                 else
                 {
-                    response.Data = Models.VendaDetalhe.ConvertResponse(vendaDetalheCore);
-                    _logger.LogDebug("response", [response]);
-                    _logger.LogTrace("Return OK");
+                    ExceptionResponse.Ok(ref response, VendaDetalhe.ConvertResponse(vendaDetalheCore), _logger);
                     return Ok(response);
                 }
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
             
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -318,34 +242,18 @@ public class VendasController : ControllerBase
                 _logger.LogTrace("_core.Add");
                 vendaCore = _coreVenda.UpdateVenda(vendaCore);
                 _logger.LogDebug("vendaCore",[vendaCore]);
-                response.Data = Models.Venda.ConvertResponse(vendaCore);
-                _logger.LogDebug("response", [response]);
-                _logger.LogTrace("Return OK");
+                ExceptionResponse.Ok(ref response, Models.Venda.ConvertResponse(vendaCore), _logger);
                 return Ok(response);
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -370,46 +278,24 @@ public class VendasController : ControllerBase
                     _logger.LogTrace("_core.UpdateDetalhe");
                     detalheCore = _coreVenda.UpdateDetalhe(venda,detalheCore);
                     _logger.LogDebug("detalheCore",[detalheCore]);
-                    response.Data = Models.VendaDetalhe.ConvertResponse(detalheCore);
-                    _logger.LogDebug("response", [response]);
-                    _logger.LogTrace("Return OK");
+                    ExceptionResponse.Ok(ref response, VendaDetalhe.ConvertResponse(detalheCore), _logger);
                     return Ok(response);
                 }
                 else
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Error,
-                        Message = "Detalhe da venda não encontrado"
-                    });
-                    _logger.LogDebug("response",[response]);
+                    ExceptionResponse.Warning(ref response, "Detalhe da venda não encontrado", _logger);
                     return NotFound(response);
                 }
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -429,51 +315,24 @@ public class VendasController : ControllerBase
                 _logger.LogTrace("_core.Add");
                 if (_coreVenda.DeleteVenda(venda))
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Info,
-                        Message = "Registro apagado."
-                    });
-                    _logger.LogDebug("response",[response]);
-                    _logger.LogTrace("Return OK");
+                    ExceptionResponse.Ok(ref response, "Registro apagado", _logger);
                     return Ok(response);
                 }
                 else
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Error,
-                        Message = "Não possível apagar a venda"
-                    });
-                    _logger.LogDebug("response",[response]);
+                    ExceptionResponse.Error(ref response, "Não possível apagar a venda", _logger);
                     return BadRequest(response);
                 }
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -494,63 +353,30 @@ public class VendasController : ControllerBase
                 {
                     if (_coreVenda.DeleteDetalhe(venda,detalhe))
                     {
-                        response.Validation = new Core.Validate.Validation();
-                        response.Validation.Add(new Core.Validate.ModelValid()
-                        {
-                            Type = Core.Validate.ValidType.Info,
-                            Message = "Registro apagado."
-                        });
-                        _logger.LogDebug("response",[response]);
-                        _logger.LogTrace("Return OK");
+                        ExceptionResponse.Ok(ref response, "Registro apagado", _logger);
                         return Ok(response);
                     }
                     else
                     {
-                        response.Validation = new Core.Validate.Validation();
-                        response.Validation.Add(new Core.Validate.ModelValid()
-                        {
-                            Type = Core.Validate.ValidType.Error,
-                            Message = "Não possível apagar a venda"
-                        });
-                        _logger.LogDebug("response",[response]);
+                        ExceptionResponse.Error(ref response, "Não possível apagar a venda", _logger);
                         return BadRequest(response);
                     }
                 }
                 else
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Error,
-                        Message = "Detalhe da venda não encontrada"
-                    });
-                    _logger.LogDebug("response",[response]);
+                    ExceptionResponse.Warning(ref response, "Detalhe da venda não encontrada", _logger);
                     return NotFound(response);
                 }
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Venda não encontrada"
-                });
-                _logger.LogDebug("response",[response]);
+                ExceptionResponse.Warning(ref response, "Venda não encontrada", _logger);
                 return NotFound(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }

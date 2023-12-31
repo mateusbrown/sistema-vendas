@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaVendasApi.Data;
-using SistemaVendasApi.Core;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-
+using SistemaVendasApi.Services;
 
 namespace SistemaVendasApi.Controllers;
 
@@ -17,7 +15,7 @@ public class ProdutosController : ControllerBase
     {
         _logger = logger;
         _core = new Produtos(context);
-    }
+    }    
 
     [HttpGet()]
     public IActionResult Get()
@@ -36,23 +34,12 @@ public class ProdutosController : ControllerBase
                 _logger.LogDebug("ConvertResponse", [m]);
                 lst.Add(m);
             }
-            response.Data = lst;
-            _logger.LogDebug("response", [response]);
-            _logger.LogTrace("Return OK");
-            
+            Models.ExceptionResponse.Ok(ref response, lst, _logger);            
             return Ok(response);
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -71,23 +58,13 @@ public class ProdutosController : ControllerBase
             {
                 var m = new Models.ProdutoResponse();
                 m = Models.Produto.ConvertResponse(produto);
-                _logger.LogDebug("ConvertResponse", [m]);
-                response.Data = m;
-                _logger.LogTrace("Return OK");
+                Models.ExceptionResponse.Ok(ref response, m, _logger);
                 return Ok(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -112,23 +89,13 @@ public class ProdutosController : ControllerBase
             }
             else
             {
-                response.Data = Models.Produto.ConvertResponse(produtoCore);
-                _logger.LogDebug("response", [response]);
-                _logger.LogTrace("Return OK");
+                Models.ExceptionResponse.Ok(ref response, Models.Produto.ConvertResponse(produtoCore), _logger);
                 return Ok(response);
             }
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -150,16 +117,15 @@ public class ProdutosController : ControllerBase
                 _logger.LogDebug("produtoAlt",[produtoAlt]);
                 _logger.LogTrace("_core.Add");
                 _core.Update(produtoAlt);
-                _logger.LogDebug("response", [response]);
-                _logger.LogTrace("Return OK");
+                Models.ExceptionResponse.Ok(ref response, "", _logger);
                 return Ok(response);
             }
             else
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
+                response.Validation = new Validation.ValidateProcess();
+                response.Validation.Add(new Validation.ModelValid()
                 {
-                    Type = Core.Validate.ValidType.Error,
+                    Type = Validation.ValidType.Error,
                     Message = "Produto não encontrado"
                 });
                 _logger.LogDebug("response",[response]);
@@ -169,15 +135,7 @@ public class ProdutosController : ControllerBase
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
@@ -195,13 +153,7 @@ public class ProdutosController : ControllerBase
             _logger.LogDebug("produtoCore",[produtoCore]);
             if (produtoCore == null)
             {
-                response.Validation = new Core.Validate.Validation();
-                response.Validation.Add(new Core.Validate.ModelValid()
-                {
-                    Type = Core.Validate.ValidType.Error,
-                    Message = "Produto não encontrado"
-                });
-                _logger.LogDebug("response",[response]);
+                Models.ExceptionResponse.Warning(ref response, "Produto não encontrado", _logger);
                 return NotFound(response);
             }
             else
@@ -209,14 +161,7 @@ public class ProdutosController : ControllerBase
                 _logger.LogTrace("_core.Delete");
                 if (_core.Delete(produtoCore))
                 {
-                    response.Validation = new Core.Validate.Validation();
-                    response.Validation.Add(new Core.Validate.ModelValid()
-                    {
-                        Type = Core.Validate.ValidType.Info,
-                        Message = "Registro apagado."
-                    });
-                    _logger.LogDebug("response",[response]);
-                    _logger.LogTrace("Return OK");
+                    Models.ExceptionResponse.Ok(ref response, "Registro apagado.", _logger);
                     return Ok(response);
                 }
                 else
@@ -227,15 +172,7 @@ public class ProdutosController : ControllerBase
         }
         catch(Exception ex)
         {
-            response.Validation = new Core.Validate.Validation();
-            response.Validation.Add(new Core.Validate.ModelValid()
-            {
-                Type = Core.Validate.ValidType.Error,
-                Message = ex.Message
-            });
-            _logger.LogDebug("response",[response]);
-            _logger.LogDebug("ex", [ex]);
-            _logger.LogError("Exception",[ex]);
+            Models.ExceptionResponse.Error(ref response,ex,_logger);
             return BadRequest(response);
         }
     }
